@@ -1,75 +1,141 @@
-// Building a seamless playing interfac
-
-
-import { createContext, useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-
-const AudioContext = createContext();
+import { AudioContext } from './contextInstance';
 
 export const AudioProvider = ({ children }) => {
-const [currentTrack, setCurrentTrack] = useState(null);
-const [isPlaying, setIsPlaying] = useState(false);
-const [player, setPlayer] = useState(null);
-
+  const [currentTrack, setCurrentTrack] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [player, setPlayer] = useState(null);
+  const playerRef = useRef(null);
+  const pendingYoutubeIdRef = useRef(null);
 
   // Initialize YouTube Iframe API globally
   useEffect(() => {
-    if (!window.YT) {
-      const tag = document.createElement('script');
-      tag.src = 'https://youtube.com';
-      const firstScriptTag = document.getElementsByTagName('script')[0];
-      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    let isMounted = true;
 
-      window.onYouTubeIframeAPIReady = () => {
+    const initYTPlayer = () => {
+      if (!window.YT || !window.YT.Player) return;
+      if (playerRef.current) return;
+
+      try {
         const ytPlayer = new window.YT.Player('hidden-youtube-player', {
           height: '0',
           width: '0',
+          playerVars: {
+            autoplay: 1,
+            playsinline: 1,
+            controls: 0,
+          },
           events: {
+            onReady: (event) => {
+              if (!isMounted) return;
+              playerRef.current = event.target;
+              setPlayer(event.target);
+
+              // If a song was clicked while player was still loading
+              if (pendingYoutubeIdRef.current) {
+                event.target.loadVideoById(pendingYoutubeIdRef.current);
+                pendingYoutubeIdRef.current = null;
+              }
+            },
             onStateChange: (event) => {
-              // 0 means ended -> auto stop or skip
-              if (event.data === 0) setIsPlaying(false);
+              if (!isMounted) return;
+              // 0: Ended, 1: Playing, 2: Paused
+              if (event.data === 0) {
+                setIsPlaying(false);
+              } else if (event.data === 1) {
+                setIsPlaying(true);
+              } else if (event.data === 2) {
+                setIsPlaying(false);
+              }
+            },
+            onError: (err) => {
+              console.error('YouTube player error:', err);
+              if (isMounted) setIsPlaying(false);
             },
           },
         });
+
+        playerRef.current = ytPlayer;
         setPlayer(ytPlayer);
+      } catch (err) {
+        console.error('Failed to instantiate YouTube player:', err);
+      }
+    };
+
+    if (window.YT && window.YT.Player) {
+      initYTPlayer();
+    } else {
+      const prevCallback = window.onYouTubeIframeAPIReady;
+      window.onYouTubeIframeAPIReady = () => {
+        if (typeof prevCallback === 'function') prevCallback();
+        initYTPlayer();
       };
+
+      if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
+        const tag = document.createElement('script');
+        tag.src = 'https://www.youtube.com/iframe_api';
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        if (firstScriptTag && firstScriptTag.parentNode) {
+          firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+        } else {
+          document.head.appendChild(tag);
+        }
+      }
     }
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const playTrack = async (track) => {
     try {
       setCurrentTrack(track);
-      setIsPlaying(true);
 
       // Hit our backend resolve engine
-      const API_URL = import.meta.env.VITE_API_URL;
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
       const response = await axios.get(`${API_URL}/music/resolve`, {
         params: {
           spotifyId: track.spotifyId,
           title: track.title,
-          artist: track.artist
-        }
+          artist: track.artist,
+        },
       });
 
       const { youtubeId } = response.data;
-      //setYoutubeId(youtubeId);
+      if (!youtubeId) {
+        throw new Error('No YouTube ID resolved for track');
+      }
 
-      if (player && youtubeId) {
-        player.loadVideoById(youtubeId);
-        player.playVideo();
+      const activePlayer = playerRef.current || player;
+      if (activePlayer && typeof activePlayer.loadVideoById === 'function') {
+        activePlayer.loadVideoById(youtubeId);
+        setIsPlaying(true);
+      } else {
+        // Player not ready yet, save pending
+        pendingYoutubeIdRef.current = youtubeId;
+        setIsPlaying(true);
       }
     } catch (error) {
-      console.error('Error streaming track:', error.message);
+      console.error('Error streaming track:', error?.response?.data || error.message);
+      setIsPlaying(false);
     }
   };
 
   const togglePlay = () => {
-    if (!player) return;
+    const activePlayer = playerRef.current || player;
+    if (!activePlayer) return;
+
     if (isPlaying) {
-      player.pauseVideo();
+      if (typeof activePlayer.pauseVideo === 'function') {
+        activePlayer.pauseVideo();
+      }
       setIsPlaying(false);
     } else {
-      player.playVideo();
+      if (typeof activePlayer.playVideo === 'function') {
+        activePlayer.playVideo();
+      }
       setIsPlaying(true);
     }
   };
@@ -77,9 +143,10 @@ const [player, setPlayer] = useState(null);
   return (
     <AudioContext.Provider value={{ currentTrack, isPlaying, playTrack, togglePlay }}>
       {children}
-      {/* Invisible anchor element injected into DOM for stream extraction */}
-      <div id="hidden-youtube-player" style={{ position: 'absolute', top: '-1000px' }}></div>
+      {/* Invisible anchor element container injected into DOM for stream extraction */}
+      <div style={{ position: 'fixed', top: '-9999px', left: '-9999px', width: '1px', height: '1px', opacity: 0, pointerEvents: 'none' }}>
+        <div id="hidden-youtube-player"></div>
+      </div>
     </AudioContext.Provider>
   );
 };
-
