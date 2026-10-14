@@ -57,3 +57,18 @@ exports.login = async (req, res) => {
     res.status(500).json({ error: 'Server login error' });
   }
 };
+
+// 3. Get Logged-in User Profile Data
+exports.getProfile = async (req, res) => {
+  try {
+    // Look up user by the ID injected into req.userId by the authMiddleware
+    // .select('-password') ensures we don't accidentally leak the hashed password!
+    const user = await User.findById(req.userId).select('-password');
+    if (!user) {
+      return res.status(404).json({ error: 'User account not found' });
+    }
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ error: 'Server error retrieving profile' });
+  }
+};
