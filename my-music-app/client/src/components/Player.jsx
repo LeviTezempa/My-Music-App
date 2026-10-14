@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useAudio } from '../hooks/useAudio';
-import { Play, Pause, Music } from 'lucide-react';
+import { Play, Pause, Music } from 'lucide-react'; // react built-in icon library
 
+// Calls a default image url anytime a false image refuses to load.
 const FALLBACK_ARTWORK = 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100&auto=format&fit=crop&q=60';
 
 export default function Player() {
