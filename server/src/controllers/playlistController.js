@@ -6,7 +6,7 @@ const Playlist = require('../models/Playlist');
 exports.getUserPlaylists = async (req, res) => {
     try {
         const playlists = await Playlist.find({ userId: req.userId }).select('name tracks.length createdAt');
-        res.json(Playlists);
+        res.json(playlists);
     } catch (error) {
         res.status(500).json({ error: 'Failed to retrieve playlists'});
     } 
@@ -31,7 +31,7 @@ exports.getPlaylistById = async (req, res) => {
     try {
         const playlist = await Playlist.findOne({ _id: req.params.id, userId: req.userId });
         if (!playlist) return res.status(404).json({ error: 'Playlist not found' });
-        res.json(Playlist);
+        res.json(playlist);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch playlist items' });
     }

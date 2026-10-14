@@ -25,7 +25,7 @@ mongoose.connect(process.env.MONGO_URI)
 // 2. Setup Routes API Prefix
 app.use('/api/music', musicRoutes);
 app.use('/api/auth', authRoutes);
-app.use('/api/playlist.routes', playlistRoutes); // Bind playlist routes
+app.use('/api/playlists', playlistRoutes);
 
 app.get('/', (req, res) => {
   res.send('Music App Backend Server is Running!');

@@ -6,9 +6,14 @@ const TrackCache = require('../models/TrackCache');
 // 1. Get Trending / Hype Tracks from Last.fm
 exports.getNewReleases = async (req, res) => {
   try {
-    // We use chart.getHypedTracks or chart.getTopTracks to find trending, fresh music
-    const lastFmUrl = `https://audioscrobbler.com{process.env.LASTFM_API_KEY}&format=json&limit=20`;
-    const response = await axios.get(lastFmUrl);
+    const response = await axios.get('https://ws.audioscrobbler.com/2.0/', {
+      params: {
+        method: 'chart.gettoptracks',
+        api_key: process.env.LASTFM_API_KEY,
+        format: 'json',
+        limit: 20
+      }
+    });
     
     const items = response.data.tracks?.track || [];
     
@@ -43,9 +48,15 @@ exports.resolveTrack = async (req, res) => {
     }
 
     const searchQuery = encodeURIComponent(`${artist} - ${title} official audio`);
-    const youtubeUrl = `https://googleapis.com{searchQuery}&type=video&maxResults=1&key=${process.env.YOUTUBE_API_KEY}`;
-
-    const ytResponse = await axios.get(youtubeUrl);
+    const ytResponse = await axios.get('https://www.googleapis.com/youtube/v3/search', {
+      params: {
+        part: 'snippet',
+        q: `${artist} - ${title} official audio`,
+        type: 'video',
+        maxResults: 1,
+        key: process.env.YOUTUBE_API_KEY
+      }
+    });
     const youtubeId = ytResponse.data.items?.[0]?.id?.videoId;
 
     if (!youtubeId) {

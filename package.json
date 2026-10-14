@@ -1,0 +1,12 @@
+{
+  "name": "music-app",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently --kill-others -n server,client \"npm run dev --prefix server\" \"npm run dev --prefix my-music-app/client\"",
+    "dev:server": "npm run dev --prefix server",
+    "dev:client": "npm run dev --prefix my-music-app/client"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.6"
+  }
+}
