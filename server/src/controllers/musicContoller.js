@@ -3,6 +3,17 @@
 const axios = require('axios'); // Allows my data to fetch track data.
 const TrackCache = require('../models/TrackCache');
 
+const getArtworkUrl = (images) => {
+  if (!Array.isArray(images)) return null;
+
+  const artwork = [...images]
+    .reverse()
+    .map((image) => image?.['#text']?.trim())
+    .find((url) => url && /^https?:\/\//i.test(url));
+
+  return artwork?.replace(/^http:/i, 'https:') || null;
+};
+
 // 1. Get Trending / Hype Tracks from Last.fm
 exports.getNewReleases = async (req, res) => {
   try {
@@ -17,12 +28,11 @@ exports.getNewReleases = async (req, res) => {
     
     const items = response.data.tracks?.track || [];
     
-    // Map data fields smoothly into our standard React schema
     const tracks = items.map((item, index) => ({
       spotifyId: `lastfm-${index}-${item.name.replace(/\s+/g, '-').toLowerCase()}`, // Unique fallback ID for keys
       title: item.name,
       artist: item.artist?.name || 'Unknown Artist',
-      artwork: item.image?.[2]?.['#text'] || 'https://placehold.co', // Fallback artwork frame
+      artwork: getArtworkUrl(item.image),
       releaseDate: 'Trending Now'
     }));
 
@@ -47,7 +57,6 @@ exports.resolveTrack = async (req, res) => {
       return res.json({ youtubeId: cachedTrack.youtubeId, source: 'cache' });
     }
 
-    const searchQuery = encodeURIComponent(`${artist} - ${title} official audio`);
     const ytResponse = await axios.get('https://www.googleapis.com/youtube/v3/search', {
       params: {
         part: 'snippet',

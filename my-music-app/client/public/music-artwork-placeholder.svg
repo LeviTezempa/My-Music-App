@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" role="img" aria-label="Music artwork unavailable">
+  <rect width="300" height="300" fill="#181818"/>
+  <circle cx="150" cy="150" r="88" fill="#242424"/>
+  <circle cx="150" cy="150" r="24" fill="#1db954"/>
+  <path d="M174 78v103a34 34 0 1 1-12-26V98l58-14v81a34 34 0 1 1-12-26V67z" fill="#fff"/>
+</svg>

@@ -187,6 +187,7 @@
 }
 
 .track-card {
+  position: relative;
   overflow: hidden;
   padding: 1rem;
   border-radius: 8px;
@@ -225,6 +226,292 @@
   border-radius: 50%;
   background: #1db954;
   color: #fff;
+}
+
+.track-card-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+}
+
+.track-add-button {
+  display: flex;
+  width: 36px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: #282828;
+  color: #b3b3b3;
+  cursor: pointer;
+}
+
+.playlist-dropdown-menu {
+  position: absolute;
+  z-index: 10;
+  right: 10px;
+  bottom: 60px;
+  width: 180px;
+  padding: 0.5rem 0;
+  border: 1px solid #3e3e3e;
+  border-radius: 8px;
+  background: #282828;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 50%);
+}
+
+.playlist-dropdown-heading {
+  margin-bottom: 0.25rem;
+  padding: 0.25rem 1rem;
+  border-bottom: 1px solid #3e3e3e;
+  color: #b3b3b3;
+  font-size: 0.75rem;
+}
+
+.playlist-dropdown-empty {
+  padding: 0.5rem 1rem;
+  color: #b3b3b3;
+  font-size: 0.85rem;
+}
+
+.playlist-dropdown-item {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.9rem;
+  text-align: left;
+}
+
+.playlist-dropdown-item:hover {
+  background: #333;
+}
+
+.playlists-page {
+  display: flex;
+  min-height: 100vh;
+  padding: 2rem 2rem 6rem;
+  background: #121212;
+  color: #fff;
+}
+
+.playlist-sidebar {
+  width: 30%;
+  flex: 0 0 30%;
+  padding-right: 2rem;
+  border-right: 1px solid #282828;
+}
+
+.playlist-library-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.create-playlist-form {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.playlist-input {
+  min-width: 0;
+  flex: 1;
+  padding: 0.6rem 1rem;
+  border: 1px solid #333;
+  border-radius: 20px;
+  outline: none;
+  background: #242424;
+  color: #fff;
+}
+
+.playlist-input:focus {
+  border-color: #1db954;
+}
+
+.playlist-submit-btn {
+  display: flex;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: #1db954;
+  color: #fff;
+  cursor: pointer;
+}
+
+.playlist-sidebar-list,
+.playlist-track-rows-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.playlist-sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border: 0;
+  border-radius: 8px;
+  background: #181818;
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  transition: background 0.2s ease;
+}
+
+.playlist-sidebar-item.active,
+.playlist-sidebar-item:hover {
+  background: #282828;
+}
+
+.playlist-sidebar-item-info {
+  min-width: 0;
+}
+
+.playlist-sidebar-item-name {
+  overflow: hidden;
+  font-weight: bold;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.playlist-sidebar-item-count {
+  color: #b3b3b3;
+  font-size: 0.8rem;
+}
+
+.playlist-content-view {
+  width: 70%;
+  min-width: 0;
+  padding-left: 2rem;
+}
+
+.active-playlist-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+  font-size: 2.5rem;
+}
+
+.empty-playlist-msg {
+  margin-top: 4rem;
+  color: #b3b3b3;
+  font-size: 1.05rem;
+  text-align: center;
+}
+
+.playlist-track-row,
+.playlist-track-details,
+.playlist-track-actions {
+  display: flex;
+  align-items: center;
+}
+
+.playlist-track-row {
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: #181818;
+  transition: background 0.2s;
+}
+
+.playlist-track-details {
+  min-width: 0;
+  gap: 1rem;
+}
+
+.playlist-track-index {
+  width: 24px;
+  flex: 0 0 24px;
+  color: #b3b3b3;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.playlist-track-artwork {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.playlist-track-info {
+  min-width: 0;
+}
+
+.playlist-track-title,
+.playlist-track-artist {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.playlist-track-title {
+  font-size: 0.95rem;
+  font-weight: bold;
+}
+
+.playlist-track-artist {
+  margin-top: 0.15rem;
+  color: #b3b3b3;
+  font-size: 0.85rem;
+}
+
+.playlist-track-actions {
+  flex: 0 0 auto;
+  gap: 1.25rem;
+}
+
+.playlist-row-play-btn,
+.playlist-row-delete-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.playlist-row-play-btn {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: #1db954;
+  color: #fff;
+}
+
+.playlist-row-delete-btn {
+  padding: 4px;
+  border: 0;
+  background: transparent;
+  color: #ff5c5c;
+}
+
+.playlist-empty-selection {
+  display: flex;
+  height: 60vh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: #b3b3b3;
+  text-align: center;
 }
 
 .player-bar {
@@ -438,6 +725,49 @@
     padding: 1.25rem 1rem 6rem;
   }
 
+  .playlists-page {
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1.25rem 1rem 6rem;
+  }
+
+  .playlist-sidebar,
+  .playlist-content-view {
+    width: 100%;
+    padding: 0;
+  }
+
+  .playlist-sidebar {
+    flex-basis: auto;
+    padding-bottom: 1.5rem;
+    border-right: 0;
+    border-bottom: 1px solid #282828;
+  }
+
+  .active-playlist-heading {
+    gap: 0.5rem;
+    font-size: 1.75rem;
+  }
+
+  .active-playlist-heading svg {
+    width: 28px;
+    height: 28px;
+    flex: 0 0 28px;
+  }
+
+  .playlist-track-row {
+    gap: 0.5rem;
+    padding: 0.75rem 0.5rem;
+  }
+
+  .playlist-track-details {
+    gap: 0.5rem;
+  }
+
+  .playlist-track-actions {
+    gap: 0.5rem;
+  }
+
   .player-bar {
     gap: 0.75rem;
     padding: 0.75rem 1rem;
@@ -459,4 +789,28 @@
   .auth-dialog {
     padding: 2rem 1.5rem;
   }
+}
+
+.track-add-button:hover {
+  transform: scale(1.05);
+  color: #fff !important;
+}
+
+.navbar-link {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: #fff;
+  transition: color 0.2s ease;
+}
+
+.navbar-link:hover, .navbar-link.active {
+  color: #1DB954; /* Beautiful streaming green */
+}
+
+.navbar-link.active {
+  font-weight: bold;
 }

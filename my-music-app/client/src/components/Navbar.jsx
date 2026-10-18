@@ -1,13 +1,14 @@
-// my navigation data
 
 import { Disc, Heart, LogIn, LogOut, User } from 'lucide-react';
 
-export default function Navbar({ onLoginClick, user, onLogout, onRestrictedClick }) {
+export default function Navbar({ onLoginClick, user, onLogout, onRestrictedClick, onTabChange, activeTab }) {
   
   // Navigation gate handler on click without login
-  const handleNavClick = (tabName) => {
+  const handleNavClick = (tabName, tabValue) => {
     if (!user) {
       onRestrictedClick(`Please register an account or log in to explore ${tabName}!`);
+    } else {
+      onTabChange(tabValue); // Switch views when authenticated
     }
   };
 
@@ -18,10 +19,19 @@ export default function Navbar({ onLoginClick, user, onLogout, onRestrictedClick
       </div>
 
       <div className="navbar-actions">
-        <button className="navbar-link" onClick={() => handleNavClick('Discover')}>
+        {/* Discover Button - Applies an 'active' class when selected */}
+        <button
+          className={`navbar-link ${activeTab === 'discover' ? 'active' : ''}`}
+          onClick={() => handleNavClick('Discover', 'discover')}
+        >
           <Disc size={18}/> Discover
         </button>
-        <button className="navbar-link" onClick={() => handleNavClick('Playlists')}>
+
+        {/* Playlists Button - Applies an 'active' class when selected */}
+        <button
+          className={`navbar-link ${activeTab === 'playlists' ? 'active' : ''}`}
+          onClick={() => handleNavClick('Playlists', 'playlists')}
+        >
           <Heart size={18}/> Playlists
         </button>
 
