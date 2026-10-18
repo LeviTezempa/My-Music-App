@@ -14,39 +14,29 @@ export default function Player() {
   const artworkUrl = imgSrc || currentTrack.artwork || FALLBACK_ARTWORK;
 
   return (
-    <div style={{
-      position: 'fixed', bottom: 0, left: 0, right: 0, background: '#181818',
-      padding: '0.85rem 2rem', display: 'flex', justifyContent: 'space-between',
-      alignItems: 'center', borderTop: '1px solid #282828', color: '#fff', zIndex: 100
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', minWidth: '200px' }}>
-        <img 
-          src={artworkUrl} 
-          alt={currentTrack.title || 'Track artwork'} 
+    <div className="player-bar">
+      <div className="player-track">
+        <img
+          className="player-artwork"
+          src={artworkUrl}
+          alt={currentTrack.title || 'Track artwork'}
           onError={() => setImgSrc(FALLBACK_ARTWORK)}
-          style={{ width: '52px', height: '52px', borderRadius: '4px', objectFit: 'cover' }} 
         />
-        <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          <div style={{ fontWeight: 'bold', fontSize: '0.95rem', color: '#fff' }}>{currentTrack.title}</div>
-          <div style={{ color: '#b3b3b3', fontSize: '0.8rem' }}>{currentTrack.artist}</div>
+        <div className="player-track-info">
+          <div className="player-title">{currentTrack.title}</div>
+          <div className="player-artist">{currentTrack.artist}</div>
         </div>
       </div>
       <div>
-        <button 
-          onClick={togglePlay} 
+        <button
+          className="player-toggle"
+          onClick={togglePlay}
           aria-label={isPlaying ? 'Pause' : 'Play'}
-          style={{
-            background: '#fff', border: 'none', width: '42px', height: '42px',
-            borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', 
-            cursor: 'pointer', transition: 'transform 0.1s ease'
-          }}
-          onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.95)')}
-          onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
         >
-          {isPlaying ? <Pause size={20} color="#000" /> : <Play size={20} color="#000" style={{ marginLeft: '2px' }} />}
+          {isPlaying ? <Pause size={20} color="#000" /> : <Play className="player-play-icon" size={20} color="#000" />}
         </button>
       </div>
-      <div style={{ color: '#b3b3b3', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+      <div className="player-caption">
         <Music size={16} /> Streaming audio via YouTube
       </div>
     </div>

@@ -144,7 +144,7 @@ export const AudioProvider = ({ children }) => {
     <AudioContext.Provider value={{ currentTrack, isPlaying, playTrack, togglePlay }}>
       {children}
       {/* Invisible anchor element container injected into DOM for stream extraction */}
-      <div style={{ position: 'fixed', top: '-9999px', left: '-9999px', width: '1px', height: '1px', opacity: 0, pointerEvents: 'none' }}>
+      <div className="hidden-youtube-player">
         <div id="hidden-youtube-player"></div>
       </div>
     </AudioContext.Provider>

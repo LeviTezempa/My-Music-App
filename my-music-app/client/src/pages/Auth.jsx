@@ -1,6 +1,3 @@
-// My login from
-
-
 import { useState } from 'react';
 import axios from 'axios';
 import { LogIn, UserPlus, Mail, Lock, User } from 'lucide-react';
@@ -42,61 +39,72 @@ export default function Auth({ onLoginSuccess, onClose }) {
   };
 
   return (
-    <div style={{
-      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-      background: 'rgba(0,0,0,0.85)', display: 'flex', justifyContent: 'center',
-      alignItems: 'center', zIndex: 1000, backdropFilter: 'blur(4px)'
-    }}>
-      <div style={{
-        background: '#181818', width: '100%', maxWidth: '400px', padding: '2.5rem',
-        borderRadius: '12px', border: '1px solid #282828', color: '#fff', position: 'relative'
-      }}>
-        <button onClick={onClose} style={{
-          position: 'absolute', top: '1rem', right: '1rem', background: 'none',
-          border: 'none', color: '#b3b3b3', fontSize: '1.25rem', cursor: 'pointer'
-        }}>✕</button>
+    <div className="auth-overlay">
+      <div className="auth-dialog">
+        <button className="auth-close-button" onClick={onClose} aria-label="Close">
+          ✕
+        </button>
 
-        <h2 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          {isRegister ? <UserPlus color="#1DB954"/> : <LogIn color="#1DB954"/>}
+        <h2 className="auth-heading">
+          {isRegister ? <UserPlus color="#1DB954" /> : <LogIn color="#1DB954" />}
           {isRegister ? 'Create Account' : 'Welcome Back'}
         </h2>
 
-        {error && <div style={{ color: '#ff5c5c', marginBottom: '1rem', fontSize: '0.9rem' }}>{error}</div>}
+        {error && <div className="auth-error">{error}</div>}
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        <form className="auth-form" onSubmit={handleSubmit}>
           {isRegister && (
-            <div style={{ position: 'relative' }}>
-              <User size={18} style={{ position: 'absolute', top: '12px', left: '12px', color: '#b3b3b3' }} />
-              <input type="text" name="username" placeholder="Username" required value={formData.username} onChange={handleChange}
-                style={{ width: '100%', padding: '0.75rem 1rem 0.75rem 2.5rem', background: '#242424', border: '1px solid #333', borderRadius: '6px', color: '#fff' }} />
+            <div className="auth-input-wrap">
+              <User className="auth-input-icon" size={18} />
+              <input
+                type="text"
+                name="username"
+                placeholder="Username"
+                required
+                value={formData.username}
+                onChange={handleChange}
+              />
             </div>
           )}
 
-          <div style={{ position: 'relative' }}>
-            <Mail size={18} style={{ position: 'absolute', top: '12px', left: '12px', color: '#b3b3b3' }} />
-            <input type="email" name="email" placeholder="Email Address" required value={formData.email} onChange={handleChange}
-              style={{ width: '100%', padding: '0.75rem 1rem 0.75rem 2.5rem', background: '#242424', border: '1px solid #333', borderRadius: '6px', color: '#fff' }} />
+          <div className="auth-input-wrap">
+            <Mail className="auth-input-icon" size={18} />
+            <input
+              type="email"
+              name="email"
+              placeholder="Email Address"
+              required
+              value={formData.email}
+              onChange={handleChange}
+            />
           </div>
 
-          <div style={{ position: 'relative' }}>
-            <Lock size={18} style={{ position: 'absolute', top: '12px', left: '12px', color: '#b3b3b3' }} />
-            <input type="password" name="password" placeholder="Password" required value={formData.password} onChange={handleChange}
-              style={{ width: '100%', padding: '0.75rem 1rem 0.75rem 2.5rem', background: '#242424', border: '1px solid #333', borderRadius: '6px', color: '#fff' }} />
+          <div className="auth-input-wrap">
+            <Lock className="auth-input-icon" size={18} />
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              required
+              value={formData.password}
+              onChange={handleChange}
+            />
           </div>
 
-          <button type="submit" disabled={loading} style={{
-            background: '#1DB954', color: '#fff', border: 'none', padding: '0.75rem',
-            borderRadius: '25px', fontWeight: 'bold', fontSize: '1rem', cursor: 'pointer', marginTop: '0.5rem'
-          }}>
+          <button className="auth-submit-button" type="submit" disabled={loading}>
             {loading ? 'Processing...' : isRegister ? 'Sign Up' : 'Log In'}
           </button>
         </form>
 
-        <div style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.9rem', color: '#b3b3b3' }}>
+        <div className="auth-switch">
           {isRegister ? 'Already have an account?' : "Don't have an account?"}{' '}
-          <span onClick={() => { setIsRegister(!isRegister); setError(''); }} style={{ color: '#1DB954', cursor: 'pointer', fontWeight: 'bold' }}>
+          <button
+            className="auth-switch-button"
+            type="button"
+            onClick={() => { setIsRegister(!isRegister); setError(''); }}
+          >
             {isRegister ? 'Log In' : 'Register Here'}
-          </span>
+          </button>
         </div>
       </div>
     </div>
