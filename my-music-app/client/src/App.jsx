@@ -49,7 +49,7 @@ export default function App() {
 
       {!user ? (
         <div className="welcome-panel">
-          <Disc size={64} color="#1DB954" />
+          <Disc size={64} color="var(--accent-purple)" />
           <h1>Music streaming starts here.</h1>
           <p>Sign up or log in to explore trending hits and save your playlists.</p>
           <button className="get-started-button" onClick={() => setShowAuth(true)}>

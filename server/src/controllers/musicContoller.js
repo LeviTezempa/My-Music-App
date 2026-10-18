@@ -43,6 +43,47 @@ exports.getNewReleases = async (req, res) => {
   }
 };
 
+exports.searchTracks = async (req, res) => {
+  const query = req.query.q?.trim();
+  if (!query) {
+    return res.status(400).json({ error: 'A search query is required' });
+  }
+
+  try {
+    const response = await axios.get('https://ws.audioscrobbler.com/2.0/', {
+      params: {
+        method: 'track.search',
+        track: query,
+        api_key: process.env.LASTFM_API_KEY,
+        format: 'json',
+        limit: 20
+      }
+    });
+
+    const items = response.data.results?.trackmatches?.track || [];
+    const tracks = items.map((item) => {
+      const artist = item.artist || 'Unknown Artist';
+      const normalizedId = `${artist}-${item.name}`
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '');
+
+      return {
+        spotifyId: `lastfm-${item.mbid || normalizedId}`,
+        title: item.name,
+        artist,
+        artwork: getArtworkUrl(item.image),
+        releaseDate: 'Search Result'
+      };
+    });
+
+    res.json(tracks);
+  } catch (error) {
+    console.error('Last.fm search error:', error.message);
+    res.status(500).json({ error: 'Failed to search for music' });
+  }
+};
+
 // 2. Resolve Track to YouTube Video ID (Remains identical to protect your quota!)
 exports.resolveTrack = async (req, res) => {
   const { spotifyId, title, artist } = req.query;

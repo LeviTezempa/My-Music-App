@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAudio } from '../hooks/useAudio';
 import { FolderHeart, Plus, Play, Trash2, Library } from 'lucide-react';
+import API_URL from '../api';
 
 export default function Playlists() {
   const [playlists, setPlaylists] = useState([]);
@@ -10,7 +11,6 @@ export default function Playlists() {
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
   const { playTrack } = useAudio();
 
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
   const token = localStorage.getItem('token');
 
   // Self-contained data initialization hook clears all linter dependency flags
@@ -28,7 +28,7 @@ export default function Playlists() {
     };
 
     fetchInitialPlaylists();
-  }, [token, API_URL]);
+  }, [token]);
 
   const handleCreatePlaylist = async (e) => {
     e.preventDefault();
@@ -81,7 +81,7 @@ export default function Playlists() {
     <main className="playlists-page">
       <aside className="playlist-sidebar">
         <h2 className="playlist-library-heading">
-          <Library size={22} color="#1DB954" /> Your Library
+          <Library size={22} color="var(--accent-purple)" /> Your Library
         </h2>
         
         <form onSubmit={handleCreatePlaylist} className="create-playlist-form">
@@ -105,7 +105,7 @@ export default function Playlists() {
               onClick={() => handleOpenPlaylist(pl._id)}
               className={`playlist-sidebar-item ${selectedPlaylist?._id === pl._id ? 'active' : ''}`}
             >
-              <FolderHeart color="#1DB954" size={20} />
+              <FolderHeart color="var(--accent-purple)" size={20} />
               <div className="playlist-sidebar-item-info">
                 <div className="playlist-sidebar-item-name">{pl.name}</div>
                 <div className="playlist-sidebar-item-count">Tracks: {pl.tracks?.length || 0}</div>
@@ -119,7 +119,7 @@ export default function Playlists() {
         {selectedPlaylist && selectedPlaylist._id ? (
           <div className="active-playlist-wrapper">
             <h1 className="active-playlist-heading">
-              <FolderHeart size={36} color="#1DB954" /> {selectedPlaylist.name}
+              <FolderHeart size={36} color="var(--accent-purple)" /> {selectedPlaylist.name}
             </h1>
             
             {selectedPlaylist.tracks && selectedPlaylist.tracks.length === 0 ? (

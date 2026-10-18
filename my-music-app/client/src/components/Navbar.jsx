@@ -15,7 +15,7 @@ export default function Navbar({ onLoginClick, user, onLogout, onRestrictedClick
   return (
     <nav className="navbar">
       <div className="navbar-brand">
-        <Disc size={28} color="#1DB954" /> <span>CloudStream</span>
+        <img className="navbar-logo" src="/sonix-logo.png" alt="Sonix" />
       </div>
 
       <div className="navbar-actions">

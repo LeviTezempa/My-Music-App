@@ -1,47 +1,75 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Play, Pause, Search, Plus, FolderHeart, X } from 'lucide-react';
 import { useAudio } from '../hooks/useAudio';
-import { Play, Pause, Search, Plus, FolderHeart } from 'lucide-react';
+import API_URL from '../api';
 
 export default function Discover() {
   const [tracks, setTracks] = useState([]);
-  const [playlists, setPlaylists] = useState([]); // Array to store user's folder configurations
+  const [playlists, setPlaylists] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeDropdown, setActiveDropdown] = useState(null); // Track which song playlist menu is open
+  const [isLoadingTracks, setIsLoadingTracks] = useState(true);
+  const [activeDropdown, setActiveDropdown] = useState(null);
   const { currentTrack, isPlaying, playTrack, togglePlay } = useAudio();
-
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
   const token = localStorage.getItem('token');
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // 1. Fetch trending music catalog feed
-        const musicResponse = await axios.get(`${API_URL}/music/new-releases`);
-        if (Array.isArray(musicResponse.data)) {
-          setTracks(musicResponse.data);
-        } else {
-          setTracks([]);
-        }
+    let isCurrentRequest = true;
+    const query = searchQuery.trim();
 
-        // 2. Fetch user playlists from database using verification token
-        if (token) {
-          const playlistsResponse = await axios.get(`${API_URL}/playlists`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          if (Array.isArray(playlistsResponse.data)) {
-            setPlaylists(playlistsResponse.data);
-          }
+    const timeoutId = setTimeout(async () => {
+      try {
+        const endpoint = query ? '/music/search' : '/music/new-releases';
+        const response = await axios.get(`${API_URL}${endpoint}`, {
+          params: query ? { q: query } : undefined
+        });
+
+        if (isCurrentRequest) {
+          setTracks(Array.isArray(response.data) ? response.data : []);
         }
       } catch (error) {
-        console.error('Failed to load initial workspace data:', error);
-        setTracks([]);
+        if (isCurrentRequest) {
+          console.error('Failed to load music search results:', error);
+          setTracks([]);
+        }
+      } finally {
+        if (isCurrentRequest) setIsLoadingTracks(false);
+      }
+    }, query ? 300 : 0);
+
+    return () => {
+      isCurrentRequest = false;
+      clearTimeout(timeoutId);
+    };
+  }, [searchQuery]);
+
+  useEffect(() => {
+    let isCurrentRequest = true;
+
+    const fetchPlaylists = async () => {
+      if (!token) {
+        setPlaylists([]);
+        return;
+      }
+
+      try {
+        const response = await axios.get(`${API_URL}/playlists`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (isCurrentRequest && Array.isArray(response.data)) {
+          setPlaylists(response.data);
+        }
+      } catch (error) {
+        console.error('Failed to load playlists:', error);
       }
     };
-    fetchData();
-  }, [API_URL, token]);
 
-  // Handle adding a song to a specific playlist inside MongoDB
+    fetchPlaylists();
+    return () => {
+      isCurrentRequest = false;
+    };
+  }, [token]);
+
   const handleAddToPlaylist = async (playlistId, track) => {
     try {
       await axios.post(`${API_URL}/playlists/${playlistId}/tracks`, {
@@ -53,38 +81,62 @@ export default function Discover() {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert('Track added to playlist safely!');
-      setActiveDropdown(null); // Close window menu anchor framework layout
+      setActiveDropdown(null);
     } catch (error) {
       alert(error.response?.data?.error || 'Failed to add track.');
     }
   };
 
-  // FILTER ENGINE: Dynamically reduces grid cards based on search matching
-  const filteredTracks = tracks.filter(track => 
-    track.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    track.artist.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const clearSearch = () => {
+    setIsLoadingTracks(true);
+    setSearchQuery('');
+    setActiveDropdown(null);
+  };
+
+  const handleSearchChange = (event) => {
+    setIsLoadingTracks(true);
+    setSearchQuery(event.target.value);
+  };
 
   return (
     <main className="discover-page">
-      <div className="search-wrap">
-        <Search className="search-icon" size={20} />
+      <form className="search-wrap" role="search" onSubmit={(event) => event.preventDefault()}>
+        <Search className="search-icon" size={20} aria-hidden="true" />
         <input
           className="search-input"
-          type="text"
-          placeholder="What do you want to listen to?"
+          type="search"
+          placeholder="Search songs or artists"
+          aria-label="Search songs or artists"
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={handleSearchChange}
         />
-      </div>
+        {searchQuery && (
+          <button
+            className="search-clear-button"
+            type="button"
+            aria-label="Clear search"
+            onClick={clearSearch}
+          >
+            <X size={18} />
+          </button>
+        )}
+      </form>
 
-      <h1 className="discover-heading">Trending Hits</h1>
+      <h1 className="discover-heading">
+        {searchQuery.trim() ? 'Search Results' : 'Trending Hits'}
+      </h1>
 
-      {filteredTracks.length === 0 ? (
-        <div className="empty-results">No matching songs found for "{searchQuery}"</div>
+      {isLoadingTracks ? (
+        <div className="empty-results" role="status">Searching music...</div>
+      ) : tracks.length === 0 ? (
+        <div className="empty-results">
+          {searchQuery.trim()
+            ? `No songs or artists found for "${searchQuery.trim()}".`
+            : 'No trending songs are available right now.'}
+        </div>
       ) : (
         <div className="track-grid">
-          {filteredTracks.map((track) => {
+          {tracks.map((track) => {
             const isThisTrackPlaying = currentTrack?.spotifyId === track.spotifyId && isPlaying;
 
             return (
@@ -92,7 +144,7 @@ export default function Discover() {
                 <img
                   className="track-artwork"
                   src={track.artwork || '/music-artwork-placeholder.svg'}
-                  alt={track.title}
+                  alt={`${track.title} artwork`}
                   onError={(event) => {
                     event.currentTarget.onerror = null;
                     event.currentTarget.src = '/music-artwork-placeholder.svg';
@@ -102,7 +154,6 @@ export default function Discover() {
                 <div className="track-artist">{track.artist}</div>
 
                 <div className="track-card-controls">
-                  {/* Play Button */}
                   <button
                     className="track-play-button"
                     onClick={() => currentTrack?.spotifyId === track.spotifyId ? togglePlay() : playTrack(track)}
@@ -113,7 +164,6 @@ export default function Discover() {
                       : <Play className="player-play-icon" size={18} />}
                   </button>
 
-                  {/* Add To Playlist Trigger Button */}
                   <button
                     className="track-add-button"
                     onClick={() => setActiveDropdown(activeDropdown === track.spotifyId ? null : track.spotifyId)}
@@ -123,20 +173,19 @@ export default function Discover() {
                   </button>
                 </div>
 
-                {/* Dynamic Dropdown Overlay Menu */}
                 {activeDropdown === track.spotifyId && (
                   <div className="playlist-dropdown-menu">
                     <div className="playlist-dropdown-heading">Add to Playlist</div>
                     {playlists.length === 0 ? (
                       <div className="playlist-dropdown-empty">No playlists found</div>
                     ) : (
-                      playlists.map(pl => (
+                      playlists.map((playlist) => (
                         <button
                           className="playlist-dropdown-item"
-                          key={pl._id}
-                          onClick={() => handleAddToPlaylist(pl._id, track)}
+                          key={playlist._id}
+                          onClick={() => handleAddToPlaylist(playlist._id, track)}
                         >
-                          <FolderHeart size={14} color="#1DB954"/> {pl.name}
+                          <FolderHeart size={14} color="var(--accent-purple)" /> {playlist.name}
                         </button>
                       ))
                     )}

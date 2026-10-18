@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { AudioContext } from './contextInstance';
+import API_URL from '../api';
 
 export const AudioProvider = ({ children }) => {
   const [currentTrack, setCurrentTrack] = useState(null);
@@ -94,7 +95,6 @@ export const AudioProvider = ({ children }) => {
       setCurrentTrack(track);
 
       // Hit our backend resolve engine
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
       const response = await axios.get(`${API_URL}/music/resolve`, {
         params: {
           spotifyId: track.spotifyId,

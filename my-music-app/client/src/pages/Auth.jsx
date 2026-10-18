@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { LogIn, UserPlus, Mail, Lock, User } from 'lucide-react';
+import API_URL from '../api';
 
 export default function Auth({ onLoginSuccess, onClose }) {
   const [isRegister, setIsRegister] = useState(false);
@@ -18,7 +19,6 @@ export default function Auth({ onLoginSuccess, onClose }) {
     setLoading(true);
     setError('');
 
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
     const endpoint = isRegister ? `${API_URL}/auth/register` : `${API_URL}/auth/login`;
 
     try {
@@ -46,7 +46,9 @@ export default function Auth({ onLoginSuccess, onClose }) {
         </button>
 
         <h2 className="auth-heading">
-          {isRegister ? <UserPlus color="#1DB954" /> : <LogIn color="#1DB954" />}
+          {isRegister
+            ? <UserPlus color="var(--accent-purple)" />
+            : <LogIn color="var(--accent-purple)" />}
           {isRegister ? 'Create Account' : 'Welcome Back'}
         </h2>
 
