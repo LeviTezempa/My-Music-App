@@ -1,90 +1,67 @@
-// Communicates with my APIs.
 
-const axios = require('axios'); // Allows my data to fetch track data.
+const axios = require('axios');
 const TrackCache = require('../models/TrackCache');
 
-const getArtworkUrl = (images) => {
-  if (!Array.isArray(images)) return null;
+// Returns top 50 songs from iTunes/Youtube uploaded defaultly on my discover.
+const TOP_SONGS_URL = 'https://rss.applemarketingtools.com/api/v2/us/music/most-played/50/songs.json';
+const ITUNES_SEARCH_URL = 'https://itunes.apple.com/search';
+const YOUTUBE_SEARCH_URL = 'https://www.googleapis.com/youtube/v3/search';
 
-  const artwork = [...images]
-    .reverse()
-    .map((image) => image?.['#text']?.trim())
-    .find((url) => url && /^https?:\/\//i.test(url));
-
-  return artwork?.replace(/^http:/i, 'https:') || null;
+// Converts low resolution artwork to a high quality image.
+const getArtworkUrl = (url) => {
+  if (typeof url !== 'string' || !/^https?:\/\//i.test(url)) return null;
+  return url.replace(/\/\d+x\d+bb(?=\.)/i, '/600x600bb');
 };
-
-// 1. Get Trending / Hype Tracks from Last.fm
+// My json data track collection.
+const mapAppleTrack = (item, index) => ({
+  spotifyId: `itunes-${item.id || item.trackId || index}`,
+  title: item.name || item.trackName || 'Unknown Track',
+  artist: item.artistName || 'Unknown Artist',
+  artwork: getArtworkUrl(item.artworkUrl100 || item.artworkUrl),
+  releaseDate: item.releaseDate ? item.releaseDate.split('T')[0] : 'Recent'
+});
+// Collects new release trending songs
 exports.getNewReleases = async (req, res) => {
   try {
-    const response = await axios.get('https://ws.audioscrobbler.com/2.0/', {
-      params: {
-        method: 'chart.gettoptracks',
-        api_key: process.env.LASTFM_API_KEY,
-        format: 'json',
-        limit: 20
-      }
-    });
-    
-    const items = response.data.tracks?.track || [];
-    
-    const tracks = items.map((item, index) => ({
-      spotifyId: `lastfm-${index}-${item.name.replace(/\s+/g, '-').toLowerCase()}`, // Unique fallback ID for keys
-      title: item.name,
-      artist: item.artist?.name || 'Unknown Artist',
-      artwork: getArtworkUrl(item.image),
-      releaseDate: 'Trending Now'
-    }));
+    const response = await axios.get(TOP_SONGS_URL, { timeout: 10000 });
+    const items = response.data?.feed?.results;
 
-    res.json(tracks);
+    if (!Array.isArray(items)) {
+      throw new Error('Apple Music returned an unexpected top songs response');
+    }
+
+    res.json(items.map(mapAppleTrack));
   } catch (error) {
-    console.error('Last.fm error:', error.message);
-    res.status(500).json({ error: 'Failed to fetch trending music' });
+    console.error('Apple Music chart error:', error.message);
+    res.status(502).json({ error: 'Failed to fetch trending songs from Apple Music' });
   }
 };
-
+// Handles my Discover search engine
 exports.searchTracks = async (req, res) => {
-  const query = req.query.q?.trim();
+  const query = typeof req.query.q === 'string' ? req.query.q.trim() : '';
   if (!query) {
     return res.status(400).json({ error: 'A search query is required' });
   }
 
   try {
-    const response = await axios.get('https://ws.audioscrobbler.com/2.0/', {
-      params: {
-        method: 'track.search',
-        track: query,
-        api_key: process.env.LASTFM_API_KEY,
-        format: 'json',
-        limit: 20
-      }
+    const response = await axios.get(ITUNES_SEARCH_URL, {
+      params: { term: query, entity: 'song', media: 'music', country: 'us', limit: 25 },
+      timeout: 10000
     });
+    const items = response.data?.results;
 
-    const items = response.data.results?.trackmatches?.track || [];
-    const tracks = items.map((item) => {
-      const artist = item.artist || 'Unknown Artist';
-      const normalizedId = `${artist}-${item.name}`
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-|-$/g, '');
+    if (!Array.isArray(items)) {
+      throw new Error('iTunes returned an unexpected search response');
+    }
 
-      return {
-        spotifyId: `lastfm-${item.mbid || normalizedId}`,
-        title: item.name,
-        artist,
-        artwork: getArtworkUrl(item.image),
-        releaseDate: 'Search Result'
-      };
-    });
-
-    res.json(tracks);
+    res.json(items.map(mapAppleTrack));
   } catch (error) {
-    console.error('Last.fm search error:', error.message);
-    res.status(500).json({ error: 'Failed to search for music' });
+    console.error('iTunes search error:', error.message);
+    res.status(502).json({ error: 'Failed to search Apple Music' });
   }
 };
 
-// 2. Resolve Track to YouTube Video ID (Remains identical to protect your quota!)
+// Resolve Track to Playable YouTube Video ID (Remains intact to protect your daily quota limits)
 exports.resolveTrack = async (req, res) => {
   const { spotifyId, title, artist } = req.query;
 
@@ -98,16 +75,17 @@ exports.resolveTrack = async (req, res) => {
       return res.json({ youtubeId: cachedTrack.youtubeId, source: 'cache' });
     }
 
-    const ytResponse = await axios.get('https://www.googleapis.com/youtube/v3/search', {
+    const ytResponse = await axios.get(YOUTUBE_SEARCH_URL, {
       params: {
         part: 'snippet',
         q: `${artist} - ${title} official audio`,
         type: 'video',
         maxResults: 1,
         key: process.env.YOUTUBE_API_KEY
-      }
+      },
+      timeout: 10000
     });
-    const youtubeId = ytResponse.data.items?.[0]?.id?.videoId;
+    const youtubeId = ytResponse.data.items?.[0]?.id?.videoId; // Collects tracks from youtube through the api key.
 
     if (!youtubeId) {
       return res.status(404).json({ error: 'Song not found on YouTube' });

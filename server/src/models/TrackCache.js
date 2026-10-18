@@ -1,5 +1,4 @@
 // Automatically clears the catch after 7days.
-
 const mongoose = require('mongoose');
 
 const TrackCacheSchema = new mongoose.Schema({

@@ -1,9 +1,7 @@
 // handles hashing passwords securely with bcryptjs and creating access passes with jsonwebtoken.
-
-
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');  
 
 // 1. User Registration
 exports.register = async (req, res) => {

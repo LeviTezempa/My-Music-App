@@ -15,7 +15,7 @@ export const AudioProvider = ({ children }) => {
     let isMounted = true;
 
     const initYTPlayer = () => {
-      if (!window.YT || !window.YT.Player) return;
+      if (!window.YT || !window.YT.Player) return; // Prevents my app from crashing or creating duplicate player
       if (playerRef.current) return;
 
       try {

@@ -9,6 +9,7 @@ export default function Discover() {
   const [playlists, setPlaylists] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoadingTracks, setIsLoadingTracks] = useState(true);
+  const [tracksError, setTracksError] = useState('');
   const [activeDropdown, setActiveDropdown] = useState(null);
   const { currentTrack, isPlaying, playTrack, togglePlay } = useAudio();
   const token = localStorage.getItem('token');
@@ -25,11 +26,13 @@ export default function Discover() {
         });
 
         if (isCurrentRequest) {
+          setTracksError('');
           setTracks(Array.isArray(response.data) ? response.data : []);
         }
       } catch (error) {
         if (isCurrentRequest) {
           console.error('Failed to load music search results:', error);
+          setTracksError(error.response?.data?.error || 'Unable to load songs right now.');
           setTracks([]);
         }
       } finally {
@@ -128,6 +131,8 @@ export default function Discover() {
 
       {isLoadingTracks ? (
         <div className="empty-results" role="status">Searching music...</div>
+      ) : tracksError ? (
+        <div className="empty-results" role="alert">{tracksError}</div>
       ) : tracks.length === 0 ? (
         <div className="empty-results">
           {searchQuery.trim()
