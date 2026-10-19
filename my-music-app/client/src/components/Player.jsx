@@ -1,3 +1,4 @@
+// The persistent Youtube iframe player bar
 import { useState } from 'react';
 import { useAudio } from '../hooks/useAudio';
 import { Play, Pause, Music } from 'lucide-react'; // react built-in icon library

@@ -1,17 +1,16 @@
 
-import { useState, useEffect } from 'react';
-import Navbar from './components/Navbar';
-import Discover from './pages/Discover';
-import Playlists from './pages/Playlists';
-import Player from './components/Player';
+import React, { useState, useEffect } from 'react';
+import { createRoot } from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
 import Auth from './pages/Auth';
-import { Disc, Lock, AlertCircle } from 'lucide-react';
+import MainRouter from './routes/MainRouter';
+import { AudioProvider } from './context/AudioContext';
+import { AlertCircle } from 'lucide-react';
 import './App.css';
 
-export default function App() {
+function AppContent() {
   const [showAuth, setShowAuth] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
-  const [activeTab, setActiveTab] = useState('discover'); // Handles panel navigation
   const [user, setUser] = useState(() => localStorage.getItem('username') || null);
 
   // Auto-hide notification popups after 4 seconds
@@ -26,7 +25,6 @@ export default function App() {
     localStorage.removeItem('token');
     localStorage.removeItem('username');
     setUser(null);
-    setActiveTab('discover');
   };
 
   return (
@@ -38,38 +36,41 @@ export default function App() {
         </div>
       )}
 
-      <Navbar
-        onLoginClick={() => setShowAuth(true)}
-        user={user}
-        onLogout={handleLogout}
-        onRestrictedClick={(msg) => setAlertMessage(msg)}
-        onTabChange={(tab) => setActiveTab(tab)}
-        activeTab={activeTab}
-      />
-
-      {!user ? (
-        <div className="welcome-panel">
-          <Disc size={64} color="var(--accent-purple)" />
-          <h1>Music streaming starts here.</h1>
-          <p>Sign up or log in to explore trending hits and save your playlists.</p>
-          <button className="get-started-button" onClick={() => setShowAuth(true)}>
-            <Lock size={18} /> Get Started Free
-          </button>
-        </div>
-      ) : activeTab === 'discover' ? (
-        <Discover />
-      ) : (
-        <Playlists />
-      )}
-
-      <Player />
-
       {showAuth && (
         <Auth
           onLoginSuccess={(username) => setUser(username)}
           onClose={() => setShowAuth(false)}
         />
       )}
+
+      <MainRouter
+        user={user}
+        setShowAuth={setShowAuth}
+        handleLogout={handleLogout}
+        setAlertMessage={setAlertMessage}
+      />
     </div>
   );
 }
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AudioProvider>
+        <AppContent />
+      </AudioProvider>
+    </BrowserRouter>
+  );
+}
+
+const rootElement = document.getElementById('root');
+
+if (!rootElement) {
+  throw new Error('Root element "#root" was not found.');
+}
+
+createRoot(rootElement).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+);

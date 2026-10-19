@@ -1,3 +1,26 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #080810;
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
 :root {
   color-scheme: dark;
   --surface-page: #080810;
@@ -15,6 +38,17 @@
   background: var(--surface-page);
   color: #fff;
   font-family: sans-serif;
+}
+
+.layout-shell {
+  min-height: 100vh;
+  background: #121212;
+  color: #fff;
+  font-family: sans-serif;
+}
+
+.main-content-window {
+  min-height: calc(100vh - 160px);
 }
 
 .alert-banner {
@@ -35,7 +69,7 @@
   transition: all 0.3s ease;
 }
 
-.welcome-panel {
+.home-page {
   display: flex;
   min-height: 70vh;
   flex-direction: column;
@@ -43,19 +77,40 @@
   justify-content: center;
   gap: 1rem;
   padding: 2rem;
+  background:
+    linear-gradient(rgb(8 8 16 / 68%), rgb(8 8 16 / 68%)),
+    url('/home.png') center / cover no-repeat;
   text-align: center;
 }
 
-.welcome-panel h1 {
+.home-icon {
+  color: var(--accent-purple);
+}
+
+.home-page h1 {
   font-size: 2.5rem;
 }
 
-.welcome-panel p {
+.home-page p {
   margin-bottom: 1rem;
   color: #b3b3b3;
 }
 
-.get-started-button,
+.home-get-started-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 2rem;
+  border: 0;
+  border-radius: 25px;
+  background: var(--accent-gradient);
+  color: #fff;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
 .navbar-button,
 .navbar-link,
 .track-play-button,
@@ -66,17 +121,6 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-}
-
-.get-started-button {
-  gap: 0.5rem;
-  padding: 0.85rem 2rem;
-  border: 0;
-  border-radius: 25px;
-  background: var(--accent-gradient);
-  color: #fff;
-  font-size: 1.1rem;
-  font-weight: bold;
 }
 
 .navbar {
@@ -121,6 +165,11 @@
   background: transparent;
   color: inherit;
   font: inherit;
+  text-decoration: none;
+}
+
+.navbar-link.active {
+  color: var(--accent-purple);
 }
 
 .navbar-user-actions {

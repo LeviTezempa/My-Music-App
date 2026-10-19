@@ -1,3 +1,4 @@
+// Global audio state (current playing song)
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { AudioContext } from './contextInstance';

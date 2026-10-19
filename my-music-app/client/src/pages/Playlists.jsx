@@ -1,4 +1,4 @@
-// client/src/pages/Playlists.jsx
+// View songs inside a specific saved playlist.
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAudio } from '../hooks/useAudio';

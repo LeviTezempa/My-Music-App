@@ -1,14 +1,12 @@
-
+// Navigation and User Profile
 import { Disc, Heart, LogIn, LogOut, User } from 'lucide-react';
+import { NavLink } from 'react-router-dom';
 
-export default function Navbar({ onLoginClick, user, onLogout, onRestrictedClick, onTabChange, activeTab }) {
-  
-  // Navigation gate handler on click without login
-  const handleNavClick = (tabName, tabValue) => {
+export default function Navbar({ onLoginClick, user, onLogout, onRestrictedClick }) {
+  const handleRestrictedClick = (event, featureName) => {
     if (!user) {
-      onRestrictedClick(`Please register an account or log in to explore ${tabName}!`);
-    } else {
-      onTabChange(tabValue); // Switch views when authenticated
+      event.preventDefault();
+      onRestrictedClick(`Please log in or register an account to access ${featureName}!`);
     }
   };
 
@@ -19,21 +17,21 @@ export default function Navbar({ onLoginClick, user, onLogout, onRestrictedClick
       </div>
 
       <div className="navbar-actions">
-        {/* Discover Button - Applies an 'active' class when selected */}
-        <button
-          className={`navbar-link ${activeTab === 'discover' ? 'active' : ''}`}
-          onClick={() => handleNavClick('Discover', 'discover')}
+        <NavLink
+          className="navbar-link"
+          to="/discover"
+          onClick={(event) => handleRestrictedClick(event, 'Discover')}
         >
           <Disc size={18}/> Discover
-        </button>
+        </NavLink>
 
-        {/* Playlists Button - Applies an 'active' class when selected */}
-        <button
-          className={`navbar-link ${activeTab === 'playlists' ? 'active' : ''}`}
-          onClick={() => handleNavClick('Playlists', 'playlists')}
+        <NavLink
+          className="navbar-link"
+          to="/playlists"
+          onClick={(event) => handleRestrictedClick(event, 'Playlists')}
         >
           <Heart size={18}/> Playlists
-        </button>
+        </NavLink>
 
         {user ? (
           <div className="navbar-user-actions">

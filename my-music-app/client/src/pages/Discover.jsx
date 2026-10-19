@@ -1,3 +1,4 @@
+// Fetches & show Apple music latest drops
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Play, Pause, Search, Plus, FolderHeart, X } from 'lucide-react';
