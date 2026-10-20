@@ -151,7 +151,7 @@ export default function Playlists() {
                       <button
                         type="button"
                         aria-label={`Play ${track.title}`}
-                        onClick={() => playTrack(track)}
+                        onClick={() => playTrack(track, selectedPlaylist.tracks)}
                         className="playlist-row-play-btn"
                       >
                         <Play className="player-play-icon" size={16} />

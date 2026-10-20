@@ -8,8 +8,14 @@ export const AudioProvider = ({ children }) => {
   const [currentTrack, setCurrentTrack] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [player, setPlayer] = useState(null);
+  const [queue, setQueue] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(-1);
+  const [history, setHistory] = useState([]);
+  const [isShuffling, setIsShuffling] = useState(false);
+  const [isRepeating, setIsRepeating] = useState(false);
   const playerRef = useRef(null);
   const pendingYoutubeIdRef = useRef(null);
+  const nextTrackRef = useRef(null);
 
   // Initialize YouTube Iframe API globally
   useEffect(() => {
@@ -45,6 +51,7 @@ export const AudioProvider = ({ children }) => {
               // 0: Ended, 1: Playing, 2: Paused
               if (event.data === 0) {
                 setIsPlaying(false);
+                nextTrackRef.current?.();
               } else if (event.data === 1) {
                 setIsPlaying(true);
               } else if (event.data === 2) {
@@ -91,7 +98,7 @@ export const AudioProvider = ({ children }) => {
     };
   }, []);
 
-  const playTrack = async (track) => {
+  const startTrack = async (track) => {
     try {
       setCurrentTrack(track);
 
@@ -124,6 +131,61 @@ export const AudioProvider = ({ children }) => {
     }
   };
 
+  const playTrack = (track, tracks = [track]) => {
+    const trackQueue = tracks.length ? tracks : [track];
+    const trackIndex = trackQueue.indexOf(track);
+    setQueue(trackQueue);
+    setCurrentIndex(trackIndex === -1 ? 0 : trackIndex);
+    setHistory([]);
+    startTrack(track);
+  };
+
+  const nextTrack = () => {
+    if (queue.length < 2) {
+      if (isRepeating && currentTrack) startTrack(currentTrack);
+      return;
+    }
+
+    let nextIndex;
+    if (isShuffling) {
+      nextIndex = Math.floor(Math.random() * (queue.length - 1));
+      if (nextIndex >= currentIndex) nextIndex += 1;
+    } else if (currentIndex < queue.length - 1) {
+      nextIndex = currentIndex + 1;
+    } else if (isRepeating) {
+      nextIndex = 0;
+    } else {
+      return;
+    }
+
+    setHistory((previousHistory) => [...previousHistory, currentIndex]);
+    setCurrentIndex(nextIndex);
+    startTrack(queue[nextIndex]);
+  };
+
+  const previousTrack = () => {
+    if (queue.length < 2) return;
+
+    let previousIndex;
+    if (history.length) {
+      previousIndex = history[history.length - 1];
+      setHistory((previousHistory) => previousHistory.slice(0, -1));
+    } else if (currentIndex > 0) {
+      previousIndex = currentIndex - 1;
+    } else if (isRepeating) {
+      previousIndex = queue.length - 1;
+    } else {
+      return;
+    }
+
+    setCurrentIndex(previousIndex);
+    startTrack(queue[previousIndex]);
+  };
+
+  useEffect(() => {
+    nextTrackRef.current = nextTrack;
+  });
+
   const togglePlay = () => {
     const activePlayer = playerRef.current || player;
     if (!activePlayer) return;
@@ -142,7 +204,20 @@ export const AudioProvider = ({ children }) => {
   };
 
   return (
-    <AudioContext.Provider value={{ currentTrack, isPlaying, playTrack, togglePlay }}>
+    <AudioContext.Provider
+      value={{
+        currentTrack,
+        isPlaying,
+        playTrack,
+        togglePlay,
+        nextTrack,
+        previousTrack,
+        isShuffling,
+        toggleShuffle: () => setIsShuffling((enabled) => !enabled),
+        isRepeating,
+        toggleRepeat: () => setIsRepeating((enabled) => !enabled),
+      }}
+    >
       {children}
       {/* Invisible anchor element container injected into DOM for stream extraction */}
       <div className="hidden-youtube-player">

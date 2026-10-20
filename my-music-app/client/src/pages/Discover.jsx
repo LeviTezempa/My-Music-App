@@ -162,7 +162,7 @@ export default function Discover() {
                 <div className="track-card-controls">
                   <button
                     className="track-play-button"
-                    onClick={() => currentTrack?.spotifyId === track.spotifyId ? togglePlay() : playTrack(track)}
+                    onClick={() => currentTrack?.spotifyId === track.spotifyId ? togglePlay() : playTrack(track, tracks)}
                     aria-label={`${isThisTrackPlaying ? 'Pause' : 'Play'} ${track.title}`}
                   >
                     {isThisTrackPlaying
