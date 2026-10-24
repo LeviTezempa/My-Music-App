@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 
 export const useYouTubePlayer = (nextTrackRef, setIsPlaying) => {
   const [player, setPlayer] = useState(null);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
   const playerRef = useRef(null);
   const pendingYoutubeIdRef = useRef(null);
   const isMountedRef = useRef(false);
@@ -52,7 +54,6 @@ export const useYouTubePlayer = (nextTrackRef, setIsPlaying) => {
         });
 
         playerRef.current = ytPlayer;
-        setPlayer(ytPlayer);
       } catch (error) {
         console.error('Failed to instantiate YouTube player:', error);
       }
@@ -84,5 +85,46 @@ export const useYouTubePlayer = (nextTrackRef, setIsPlaying) => {
     };
   }, [nextTrackRef, setIsPlaying]);
 
-  return { player, playerRef, pendingYoutubeIdRef };
+  useEffect(() => {
+    if (!player) return undefined;
+
+    const updateProgress = () => {
+      if (
+        typeof player.getCurrentTime !== 'function'
+        || typeof player.getDuration !== 'function'
+      ) {
+        return;
+      }
+
+      const nextCurrentTime = player.getCurrentTime();
+      const nextDuration = player.getDuration();
+      setCurrentTime(Number.isFinite(nextCurrentTime) ? nextCurrentTime : 0);
+      setDuration(Number.isFinite(nextDuration) ? nextDuration : 0);
+    };
+
+    updateProgress();
+    const intervalId = setInterval(updateProgress, 500);
+    return () => clearInterval(intervalId);
+  }, [player]);
+
+  const seekTo = (time) => {
+    if (!playerRef.current || typeof playerRef.current.seekTo !== 'function') return;
+    playerRef.current.seekTo(time, true);
+    setCurrentTime(time);
+  };
+
+  const resetProgress = () => {
+    setCurrentTime(0);
+    setDuration(0);
+  };
+
+  return {
+    player,
+    playerRef,
+    pendingYoutubeIdRef,
+    currentTime,
+    duration,
+    seekTo,
+    resetProgress,
+  };
 };

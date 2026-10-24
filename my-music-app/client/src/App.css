@@ -632,9 +632,10 @@ body {
   right: 0;
   bottom: 0;
   left: 0;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 2.5fr) minmax(0, 1fr);
   align-items: center;
-  justify-content: space-between;
+  gap: 1.5rem;
   padding: 0.85rem 2rem;
   border-top: 1px solid #302b40;
   background: var(--surface-navbar);
@@ -679,6 +680,93 @@ body {
   gap: 1.25rem;
 }
 
+.player-main {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.playbar {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.playbar-time {
+  min-width: 3.25rem;
+  color: #b3b3b3;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.playbar-seek {
+  --playbar-progress: 0%;
+  width: 100%;
+  height: 1.25rem;
+  margin: 0;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.playbar-seek::-webkit-slider-runnable-track {
+  height: 0.35rem;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    #d83b12 0,
+    #d83b12 var(--playbar-progress),
+    #777 var(--playbar-progress),
+    #777 100%
+  );
+}
+
+.playbar-seek::-moz-range-track {
+  height: 0.35rem;
+  border-radius: 999px;
+  background: #777;
+}
+
+.playbar-seek::-moz-range-progress {
+  height: 0.35rem;
+  border-radius: 999px;
+  background: #d83b12;
+}
+
+.playbar-seek::-webkit-slider-thumb {
+  width: 1.15rem;
+  height: 1.15rem;
+  margin-top: -0.4rem;
+  appearance: none;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: #d83b12;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 25%);
+}
+
+.playbar-seek::-moz-range-thumb {
+  width: 0.8rem;
+  height: 0.8rem;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: #d83b12;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 25%);
+}
+
+.playbar-seek:disabled {
+  cursor: default;
+}
+
+.playbar-seek:focus-visible {
+  outline: 2px solid #d83b12;
+  outline-offset: 3px;
+  border-radius: 999px;
+}
+
 .player-control-button {
   padding: 0.35rem;
   border: 0;
@@ -698,9 +786,9 @@ body {
 }
 
 .player-toggle {
-  width: 74px;
-  height: 74px;
-  padding: 6px;
+  width: 56px;
+  height: 56px;
+  padding: 4px;
   border: 0;
   border-radius: 50%;
   background: conic-gradient(from 20deg, #f97316, #ec4899, #7c3aed, #f97316);
@@ -709,7 +797,7 @@ body {
 
 .player-toggle:active,
 .player-control-button:active {
-  transform: scale(0.95);
+  transform: scale(0.85);
 }
 
 .player-toggle-inner {
@@ -923,12 +1011,21 @@ body {
   }
 
   .player-bar {
+    grid-template-columns: minmax(0, 1fr);
     gap: 0.75rem;
     padding: 0.75rem 1rem;
   }
 
   .player-track {
     min-width: 0;
+  }
+
+  .player-main {
+    width: 100%;
+  }
+
+  .player-controls {
+    gap: 1rem;
   }
 
   .player-artwork {

@@ -21,15 +21,21 @@ export const AudioProvider = ({ children }) => {
     previousTrack,
     nextTrackRef,
   } = useAudioQueue(startTrackRef, currentTrackRef);
-  const { player, playerRef, pendingYoutubeIdRef } = useYouTubePlayer(
-    nextTrackRef,
-    setIsPlaying,
-  );
+  const {
+    player,
+    playerRef,
+    pendingYoutubeIdRef,
+    currentTime,
+    duration,
+    seekTo,
+    resetProgress,
+  } = useYouTubePlayer(nextTrackRef, setIsPlaying);
 
   const startTrack = async (track) => {
     try {
       currentTrackRef.current = track;
       setCurrentTrack(track);
+      resetProgress();
 
       const response = await axios.get(`${API_URL}/music/resolve`, {
         params: {
@@ -84,6 +90,9 @@ export const AudioProvider = ({ children }) => {
       value={{
         currentTrack,
         isPlaying,
+        currentTime,
+        duration,
+        seekTo,
         playTrack,
         togglePlay,
         nextTrack,
